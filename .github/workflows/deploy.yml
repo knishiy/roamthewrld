@@ -33,7 +33,6 @@ jobs:
       - name: Build and Export with Next.js
         run: |
           npm run build
-          npm run export   # creates ./out folder
           cp out/index.html out/404.html   # fix for client-side routes
           echo "www.roamthewrld.com" > out/CNAME
       - name: Upload artifact
