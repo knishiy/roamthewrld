@@ -292,7 +292,7 @@ export default function Home() {
                 icon: "🛡️"
               },
               {
-                title: "You're' in Control",
+                title: "You're in Control",
                 description: "Check and Share your status on your terms. Only to people you choose, Only when you want.",
                 icon: "🏔️"
               }
@@ -492,7 +492,7 @@ export default function Home() {
                     {[
                       { icon: '❤️', title: 'ECG Heart Rate Monitoring', description: 'Continuous monitoring with medical-grade accuracy, providing real-time insights into your cardiovascular health.' },
                       { icon: '🍷', title: 'BAC Alcohol Detection', description: 'Advanced transdermal sensing technology that detects alcohol through your skin for accurate safety monitoring.' },
-                      { icon: '🧠', title: 'AI Signal Processing', description: 'Intelligent algorithms that analyze sensor data in real-time, providing accurate readings and predictive insights.' },
+                      { icon: '🧠', title: 'AI Signal Processing', description: 'Intelligent algorithms that analyze sensor data in real-time, learning user needs.' },
                       { icon: '📡', title: 'Bluetooth Connectivity', description: 'Seamless data transmission to your phone, keeping you connected and informed at all times.' }
                     ].map((feature, index) => (
                       <motion.div
