@@ -292,7 +292,7 @@ export default function Home() {
                 icon: "🛡️"
               },
               {
-                title: "You&apos;re in Control",
+                title: "You're' in Control",
                 description: "Check and Share your status on your terms. Only to people you choose, Only when you want.",
                 icon: "🏔️"
               }
