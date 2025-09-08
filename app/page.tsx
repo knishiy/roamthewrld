@@ -1179,34 +1179,34 @@ export default function Home() {
                 The First Transdermal Ethanol Sensor Prototype
               </h3>
               <p className="text-gray-400 mb-8 leading-relaxed">
-                This was the step that moved our bracelet from detecting alcohol in the air to sensing it directly through the skin. By integrating a MicruX ceramic screen-printed electrode (Carbon WE / Ag/AgCl RE) coated with Alcohol Oxidase (AOx) and a Prussian Blue mediator, we created a sensor that measures ethanol molecules diffusing through sweat vapor in real time.
+                This was the step that moved our bracelet from detecting alcohol in the air to sensing it directly through the skin. By integrating a MicruX ceramic screen-printed electrode (Carbon WE / Ag/AgCl RE) coated with Alcohol Oxidase (AOx) and adding stabilizers, we created a sensor that measures ethanol molecules diffusing through sweat vapor in real time.
               </p>
               <p className="text-gray-400 mb-8 leading-relaxed">
                 A gas-permeable ePTFE membrane shields the chemistry from sweat and oils while allowing ethanol to pass. The signal is amplified by an LMP91000 potentiostat and processed on the Seeed XIAO nRF52840 for Bluetooth streaming.
               </p>
               
               <div className="space-y-4">
-                <h4 className="text-xl font-semibold text-white mb-4">Key Achievements</h4>
+                <h4 className="text-xl font-semibold text-white mb-4">Reading Cycle</h4>
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                    <span className="text-gray-300">Embedded MicruX ceramic SPE with AOx enzyme & Prussian Blue catalyst</span>
+                    <span className="text-gray-300">Shutter opens to expose a SPE with a thin coat of enzyme: AOx, for the working electrode</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                    <span className="text-gray-300">ePTFE membrane for selective ethanol diffusion and fouling protection</span>
+                    <span className="text-gray-300">When ethanol vapors hit the AOx and mixes with oxygen, it creates hydrogen peroxide, which is electrochemically converted</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                    <span className="text-gray-300">On-board temperature & humidity compensation (SHTC3 sensor)</span>
+                    <span className="text-gray-300">Converted into electrons, which can be measured when SPE is wetted and stabilizers are placed throughout it.</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                    <span className="text-gray-300">BLE data transmission with real-time AI calibration models</span>
+                    <span className="text-gray-300">Ionize water to increase conductivity</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                    <span className="text-gray-300">Proof-of-concept wearable transdermal alcohol trend detection validated</span>
+                    <span className="text-gray-300">Dry the SPE for optimal usage by blotting a utilizing a fan</span>
                   </div>
                 </div>
               </div>
