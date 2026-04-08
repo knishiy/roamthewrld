@@ -3,21 +3,30 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
+
+const NeuralBandViewer = dynamic(() => import('./components/NeuralBandViewer'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-96 rounded-3xl border border-white/10 bg-gradient-to-br from-gray-900/50 to-blue-900/20 flex items-center justify-center">
+      <div className="text-gray-500">Loading 3D model...</div>
+    </div>
+  ),
+})
 
 export default function Home() {
   const [scrollY, setScrollY] = useState(0)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentSection, setCurrentSection] = useState('hero')
-  const [activeTab, setActiveTab] = useState('bracelet')
 
   useEffect(() => {
     const handleScroll = () => {
       setScrollY(window.scrollY)
-      
+
       // Detect current section
-      const sections = ['hero', 'home', 'about', 'history', 'product', 'features', 'contact']
+      const sections = ['hero', 'home', 'about', 'history', 'features', 'contact']
       const sectionElements = sections.map(id => document.getElementById(id))
-      
+
       let current = 'hero'
       sectionElements.forEach((element, index) => {
         if (element) {
@@ -27,10 +36,10 @@ export default function Home() {
           }
         }
       })
-      
+
       setCurrentSection(current)
     }
-    
+
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
@@ -38,7 +47,7 @@ export default function Home() {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
     if (element) {
-      element.scrollIntoView({ 
+      element.scrollIntoView({
         behavior: 'smooth',
         block: 'start'
       })
@@ -49,7 +58,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
       {/* Navigation */}
-      <motion.nav 
+      <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
@@ -69,7 +78,7 @@ export default function Home() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8 relative">
-            {['Home', 'About', 'Product', 'Features', 'History', 'Contact'].map((item, index) => (
+            {['Home', 'About', 'Features', 'History', 'Contact'].map((item, index) => (
               <motion.button
                 key={item}
                 onClick={() => scrollToSection(item === 'Home' ? 'hero' : item.toLowerCase())}
@@ -79,7 +88,7 @@ export default function Home() {
                 whileHover={{ y: -2 }}
                 className={`text-sm font-medium tracking-wide transition-colors duration-300 relative px-3 py-2 rounded-lg ${
                   currentSection === (item === 'Home' ? 'hero' : item.toLowerCase())
-                    ? 'text-blue-400' 
+                    ? 'text-blue-400'
                     : 'text-white hover:text-blue-400'
                 }`}
               >
@@ -135,14 +144,14 @@ export default function Home() {
           className="md:hidden overflow-hidden bg-black/95 backdrop-blur-md"
         >
           <div className="px-6 py-4 space-y-4">
-            {['Home', 'About', 'Product', 'Features', 'History', 'Contact'].map((item) => (
+            {['Home', 'About', 'Features', 'History', 'Contact'].map((item) => (
               <motion.button
                 key={item}
                 onClick={() => scrollToSection(item === 'Home' ? 'hero' : item.toLowerCase())}
                 whileHover={{ x: 10 }}
                 className={`block text-lg font-medium tracking-wide transition-colors duration-300 text-left w-full px-3 py-2 rounded-lg ${
                   currentSection === (item === 'Home' ? 'hero' : item.toLowerCase())
-                    ? 'text-blue-400 bg-blue-400/10 border border-blue-400/30' 
+                    ? 'text-blue-400 bg-blue-400/10 border border-blue-400/30'
                     : 'text-white hover:text-blue-400'
                 }`}
               >
@@ -162,15 +171,17 @@ export default function Home() {
           }}
           className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-blue-900"
         />
-        
-        {/* Animated Grid Background */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/10 to-transparent transform -skew-y-12 animate-pulse" />
-          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-blue-500/5 to-transparent transform skew-y-12 animate-pulse delay-1000" />
+
+        {/* 3D Model Background */}
+        <div className="absolute inset-0 z-0">
+          <NeuralBandViewer />
         </div>
 
+        {/* Gradient overlay for text readability */}
+        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/60 via-black/30 to-black/70 pointer-events-none" />
+
         {/* Hero Content */}
-        <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
+        <div className="relative z-10 text-center px-6 max-w-6xl mx-auto pointer-events-none">
           {/* Main Heading */}
           <motion.h1
             initial={{ opacity: 0, y: 50 }}
@@ -192,7 +203,7 @@ export default function Home() {
               transition={{ delay: 0.6, duration: 0.8 }}
               className="block text-blue-400"
             >
-              The World
+              Neural Band
             </motion.span>
           </motion.h1>
 
@@ -203,7 +214,7 @@ export default function Home() {
             transition={{ delay: 0.9, duration: 0.8 }}
             className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed"
           >
-            Redefining exploration through innovation, design, and the pursuit of extraordinary experiences.
+            An open-source neural interface that reads your body, learns your patterns, and gives you precise control over any device—even under pressure.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -211,7 +222,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2, duration: 0.8 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+            className="flex flex-col sm:flex-row gap-6 justify-center items-center pointer-events-auto"
           >
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
@@ -257,51 +268,47 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="text-center mb-20"
           >
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-4xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent"
             >
-              Roam Out. Roam Safe. Roam Connected.
+              Your Body. Your Interface. Your Control.
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xl text-gray-400 max-w-4xl mx-auto leading-relaxed mb-16"
             >
-              Roam exists to make going out and taking risks feel safer without the hassle —a consent-first bracelet that turns trusted friends into a quiet, always-there support system. With simple, opt-in signals—heart-rate trends, BAC cues, quick check-ins—it keeps your crew in sync without the noise of social media. We design for the moments that matter: the nudge to pause, the ping to regroup, the confidence to explore. Share only what you choose, for as long as you choose—so the journey stays fun without the need for accountability.
+              Roam is an open-source neural band that measures heart rate, muscle contractions, and electric signals—then uses AI to learn your unique patterns. It adapts to your stress and fatigue in real time, giving you reliable device control when it matters most. Built open, so every user can configure it to their needs.
             </motion.p>
           </motion.div>
 
           {/* Features Grid */}
-          {/* Features Grid */}
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                title: "Social Connection",
-                description: "Connect with friends and family in real time. Share your status, location, and more.",
-                icon: "👥"
+                title: "Neural Control",
+                description: "EMG and electric signal sensing translates your muscle intent into precise device commands—no buttons, no screens, just you.",
+                icon: "🧠"
               },
               {
-                title: "Safety First",
-                description: "Advanced health monitoring, BAC sensing, and emergency alerts—keeping you and your friends safe.",
-                icon: "🛡️"
+                title: "Adaptive Intelligence",
+                description: "AI/ML learns your specific patterns and adapts to fatigue and stress. When you're under pressure, the band dampens controls to prevent mistakes.",
+                icon: "⚡"
               },
               {
-                title: "You're in Control",
-                description: "Check and Share your status on your terms. Only to people you choose, Only when you want.",
-                icon: "🏔️"
+                title: "Open Source",
+                description: "Fully open hardware and software. Configure sensor thresholds, control mappings, and AI models to fit your exact use case. Run AI on-device to minimize costs.",
+                icon: "🔓"
               }
             ].map((feature, index) => (
               <motion.div
                 key={feature.title}
-                onClick={() => {
-                  if (feature.title === 'Roam') scrollToSection('roam-consumer')
-                }}
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -321,211 +328,6 @@ export default function Home() {
 
 
 
-      {/* Product Section */}
-      <section id="product" className="py-32 px-6 relative bg-gradient-to-b from-black to-gray-900">
-        <div className="max-w-6xl mx-auto">
-
-          {/* Product Features Introduction */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-20"
-          >
-            <motion.h2 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-4xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-blue-400 to-white bg-clip-text text-transparent"
-            >
-              Introducing Roam Beta
-            </motion.h2>
-            <motion.p 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-xl text-gray-400 max-w-4xl mx-auto leading-relaxed"
-            >
-              Designed for the moments that matter—sleek, protective, and always ready to keep you safe.
-            </motion.p>
-          </motion.div>
-
-          {/* Interactive Image Slider */}
-          <div id="roam-consumer" className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Image Section */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-              className="relative flex items-center justify-center group"
-              whileHover={{ scale: 1.02 }}
-            >
-              <motion.div 
-                className="relative inline-block border border-white/10 rounded-3xl p-4 overflow-hidden"
-                whileHover={{ 
-                  borderColor: "rgba(59, 130, 246, 0.5)",
-                  boxShadow: "0 0 30px rgba(59, 130, 246, 0.3)"
-                }}
-                transition={{ duration: 0.3 }}
-              >
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ 
-                    duration: 0.6, 
-                    ease: [0.4, 0.0, 0.2, 1],
-                    type: "spring",
-                    stiffness: 100,
-                    damping: 15
-                  }}
-                  className="relative"
-                >
-                  <Image
-                    src={activeTab === 'bracelet' ? '/images/bracelet.png' : '/images/IntClasp.png'}
-                    alt={activeTab === 'bracelet' ? 'Bracelet Design' : 'Interior Clasp Sensors'}
-                    width={400}
-                    height={300}
-                    className="object-contain"
-                    priority
-                  />
-                  {/* Subtle glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl pointer-events-none" />
-                </motion.div>
-              </motion.div>
-            </motion.div>
-
-            {/* Feature Descriptions with Tabs */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-              className="space-y-6"
-            >
-              {/* Unified Pill Slider */}
-              <div className="flex justify-center mb-6">
-                <div className="relative bg-gray-900/50 rounded-full p-1 border border-white/10">
-                  <motion.div
-                    className="absolute inset-1 bg-blue-600 rounded-full"
-                    animate={{
-                      x: activeTab === 'bracelet' ? 0 : 'calc(100% - 2px)',
-                      width: '50%'
-                    }}
-                    transition={{ 
-                      duration: 0.4, 
-                      ease: [0.4, 0.0, 0.2, 1],
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 25
-                    }}
-                  />
-                  <div className="flex relative z-10">
-                    <motion.div
-                      onHoverStart={() => setActiveTab('bracelet')}
-                      className="px-6 py-3 rounded-full text-sm font-medium text-white cursor-pointer transition-all duration-300"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      Bracelet
-                    </motion.div>
-                    <motion.div
-                      onHoverStart={() => setActiveTab('sensors')}
-                      className="px-6 py-3 rounded-full text-sm font-medium text-white cursor-pointer transition-all duration-300"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      Sensors
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dynamic Feature List */}
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ 
-                  duration: 0.6, 
-                  ease: [0.4, 0.0, 0.2, 1],
-                  staggerChildren: 0.1
-                }}
-                className="space-y-6"
-              >
-                {activeTab === 'bracelet' ? (
-                  // Bracelet Features
-                  <>
-                    {[
-                      { icon: '🔗', title: 'ECG and BAC Sensor in Clasp', description: 'Advanced sensors seamlessly integrated into the clasp design for maximum functionality without compromising style.' },
-                      { icon: '✨', title: 'Sleek, Slim Design', description: 'No screen for times that count and passively keep you protected. Minimalist design that goes unnoticed.' },
-                      { icon: '🛡️', title: 'Nylon/Kevlar Threading', description: 'Premium materials for the best protection. Durable, lightweight, and built to withstand any adventure.' },
-                      { icon: '⚡', title: 'Wireless Charging', description: 'Just place it and go. No cables, no hassle—effortless charging that keeps you always ready.' }
-                    ].map((feature, index) => (
-                      <motion.div
-                        key={feature.title}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                        whileHover={{ x: 5, scale: 1.02 }}
-                        className="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-900/30 transition-all duration-300 cursor-pointer"
-                      >
-                        <motion.div 
-                          className="text-2xl"
-                          whileHover={{ scale: 1.2, rotate: 5 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {feature.icon}
-                        </motion.div>
-                        <div>
-                          <h4 className="text-xl font-semibold text-white mb-1">{feature.title}</h4>
-                          <p className="text-gray-400">{feature.description}</p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </>
-                ) : (
-                  // Sensor Features
-                  <>
-                    {[
-                      { icon: '❤️', title: 'ECG Heart Rate Monitoring', description: 'Continuous monitoring with medical-grade accuracy, providing real-time insights into your cardiovascular health.' },
-                      { icon: '🍷', title: 'BAC Alcohol Detection', description: 'Advanced transdermal sensing technology that detects alcohol through your skin for accurate safety monitoring.' },
-                      { icon: '🧠', title: 'AI Signal Processing', description: 'Intelligent algorithms that analyze sensor data in real-time, learning user needs.' },
-                      { icon: '📡', title: 'Bluetooth Connectivity', description: 'Seamless data transmission to your phone, keeping you connected and informed at all times.' }
-                    ].map((feature, index) => (
-                      <motion.div
-                        key={feature.title}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                        whileHover={{ x: 5, scale: 1.02 }}
-                        className="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-900/30 transition-all duration-300 cursor-pointer"
-                      >
-                        <motion.div 
-                          className="text-2xl"
-                          whileHover={{ scale: 1.2, rotate: 5 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {feature.icon}
-                        </motion.div>
-                        <div>
-                          <h4 className="text-xl font-semibold text-white mb-1">{feature.title}</h4>
-                          <p className="text-gray-400">{feature.description}</p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </>
-                )}
-              </motion.div>
-            </motion.div>
-          </div>
-
-          
-        </div>
-      </section>
-
 
       {/* Features Section */}
       <section id="features" className="py-32 px-6 relative mb-32">
@@ -537,7 +339,7 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="text-center mb-20"
           >
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -546,14 +348,14 @@ export default function Home() {
             >
               Explore Our Features
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xl text-gray-400 max-w-4xl mx-auto leading-relaxed"
             >
-              Dive deep into each feature and discover how Roam enhances your safety, connectivity, and peace of mind.
+              Dive deep into each capability and discover how Roam gives you an edge in high-stress environments.
             </motion.p>
           </motion.div>
 
@@ -561,32 +363,32 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
-                title: 'Heart Rate Monitoring',
-                description: 'Continuous ECG monitoring with emergency alerts',
-                icon: '❤️',
-                color: 'red',
-                href: '/features/heart-rate'
+                title: 'Neural Device Control',
+                description: 'Translate muscle signals into precise device commands',
+                icon: '🧠',
+                color: 'blue',
+                href: '#neural-device-control'
               },
               {
-                title: 'BAC Sensing',
-                description: 'Transdermal alcohol detection for safety',
-                icon: '🍷',
-                color: 'amber',
-                href: '/features/bac-sensing'
+                title: 'Adaptive Dampening',
+                description: 'Stress-aware control adjustment to prevent errors',
+                icon: '🎯',
+                color: 'green',
+                href: '#adaptive-dampening'
               },
               {
-                title: 'AI Features',
-                description: 'Learn your patterns and provide intelligent safety feedback',
+                title: 'AI Pattern Learning',
+                description: 'ML models that learn your unique physiological patterns',
                 icon: '🤖',
                 color: 'purple',
-                href: '/features/ai-features'
+                href: '#ai-pattern-learning'
               },
               {
-                title: 'Accountability Mode',
-                description: 'Controlled sharing with trusted friends',
-                icon: '👥',
-                color: 'purple',
-                href: '/features/accountability-mode'
+                title: 'Habit Breaking',
+                description: 'Muscle tracking to identify and correct unwanted habits',
+                icon: '💪',
+                color: 'amber',
+                href: '#habit-breaking'
               }
             ].map((feature, index) => (
               <motion.div
@@ -601,7 +403,7 @@ export default function Home() {
                 <button
                   onClick={() => scrollToSection(feature.title.toLowerCase().replace(/\s+/g, '-'))}
                   className={`bg-gradient-to-br from-gray-900/50 p-8 rounded-2xl border backdrop-blur-sm transition-all duration-300 group-hover:scale-105 ${
-                    feature.color === 'red' ? 'to-red-900/20 border-red-500/20 group-hover:border-red-400/40 group-hover:from-gray-800/50 group-hover:to-red-800/30' :
+                    feature.color === 'blue' ? 'to-blue-900/20 border-blue-500/20 group-hover:border-blue-400/40 group-hover:from-gray-800/50 group-hover:to-blue-800/30' :
                     feature.color === 'amber' ? 'to-amber-900/20 border-amber-500/20 group-hover:border-amber-400/40 group-hover:from-gray-800/50 group-hover:to-amber-800/30' :
                     feature.color === 'green' ? 'to-green-900/20 border-green-500/20 group-hover:border-green-400/40 group-hover:from-gray-800/50 group-hover:to-green-800/30' :
                     'to-purple-900/20 border-purple-500/20 group-hover:border-purple-400/40 group-hover:from-gray-800/50 group-hover:to-purple-800/30'
@@ -610,7 +412,7 @@ export default function Home() {
                   <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
                   <p className="text-gray-400 mb-4">{feature.description}</p>
                                       <div className={`font-medium transition-colors duration-300 ${
-                      feature.color === 'red' ? 'text-red-400 group-hover:text-red-300' :
+                      feature.color === 'blue' ? 'text-blue-400 group-hover:text-blue-300' :
                       feature.color === 'amber' ? 'text-amber-400 group-hover:text-amber-300' :
                       feature.color === 'green' ? 'text-green-400 group-hover:text-green-300' :
                       'text-purple-400 group-hover:text-purple-300'
@@ -625,9 +427,9 @@ export default function Home() {
       </section>
 
       {/* Detailed Feature Sections */}
-      
-      {/* Heart Rate Monitoring Detail Section */}
-      <section id="heart-rate-monitoring" className="min-h-screen py-48 px-6 relative bg-gradient-to-b from-black to-gray-900 flex items-center">
+
+      {/* Neural Device Control Detail Section */}
+      <section id="neural-device-control" className="min-h-screen py-48 px-6 relative bg-gradient-to-b from-black to-gray-900 flex items-center">
         <div className="max-w-6xl mx-auto w-full">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
@@ -636,31 +438,31 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 1 }}
             >
-              <h2 className="text-4xl font-bold mb-8 bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">
-                Real-Time Health Monitoring
+              <h2 className="text-4xl font-bold mb-8 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                Control Devices With Your Body
               </h2>
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="text-2xl">📊</div>
+                  <div className="text-2xl">💪</div>
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Continuous Tracking</h3>
-                    <p className="text-gray-400">Monitor your heart rate 24/7 with medical-grade accuracy, providing insights into your cardiovascular health patterns.</p>
+                    <h3 className="text-xl font-semibold text-white mb-2">EMG Signal Translation</h3>
+                    <p className="text-gray-400">Electromyography sensors capture the electrical activity in your muscles and translate micro-contractions into precise digital commands for connected devices.</p>
                   </div>
                 </div>
-                
+
+                <div className="flex items-start space-x-4">
+                  <div className="text-2xl">🎮</div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white mb-2">Universal Device Control</h3>
+                    <p className="text-gray-400">Drones, robotic arms, industrial tools, surgical instruments—any Bluetooth-enabled device can be mapped to your muscle signals for hands-free operation.</p>
+                  </div>
+                </div>
+
                 <div className="flex items-start space-x-4">
                   <div className="text-2xl">⚡</div>
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">ECG Technology</h3>
-                    <p className="text-gray-400">Advanced ECG sensors detect irregular heart rhythms and potential cardiac events, offering early warning capabilities.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-4">
-                  <div className="text-2xl">🚨</div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Emergency Alerts</h3>
-                    <p className="text-gray-400">Automatic detection of concerning heart rate patterns triggers immediate alerts to your emergency contacts.</p>
+                    <h3 className="text-xl font-semibold text-white mb-2">Low-Latency Response</h3>
+                    <p className="text-gray-400">Sub-millisecond signal processing ensures your intent becomes action instantly—critical in high-stress, time-sensitive environments.</p>
                   </div>
                 </div>
               </div>
@@ -673,18 +475,18 @@ export default function Home() {
               transition={{ duration: 1 }}
               className="relative"
             >
-              <div className="w-full h-96 rounded-3xl border border-red-500/20 overflow-hidden bg-gradient-to-br from-red-900/20 to-red-800/10">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-8xl mb-4">❤️</div>
-                    <div className="text-2xl font-bold text-red-400">Heart Rate Monitor</div>
-                    <div className="text-gray-400 mt-2">Real-time ECG display</div>
-                  </div>
-                </div>
+              <div className="w-full h-96 rounded-3xl border border-blue-500/20 overflow-hidden bg-gradient-to-br from-blue-900/20 to-blue-800/10">
+                <NeuralBandViewer
+                  cameraPosition={[0, 30, 80]}
+                  cameraTarget={[0, 0, 0]}
+                  modelRotation={[Math.PI / 2, 0, 0]}
+                  autoRotate={false}
+                  accentColor="#3b82f6"
+                />
               </div>
             </motion.div>
           </div>
-          
+
           {/* Back to Features Button */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -695,7 +497,7 @@ export default function Home() {
           >
             <button
               onClick={() => scrollToSection('features')}
-              className="px-8 py-4 border border-red-500/30 hover:border-red-400/60 text-red-400 font-semibold rounded-full transition-all duration-300 backdrop-blur-sm hover:bg-red-400/10"
+              className="px-8 py-4 border border-blue-500/30 hover:border-blue-400/60 text-blue-400 font-semibold rounded-full transition-all duration-300 backdrop-blur-sm hover:bg-blue-400/10"
             >
               ← Back to Features
             </button>
@@ -706,8 +508,167 @@ export default function Home() {
       {/* Spacer */}
       <div className="h-16 bg-black"></div>
 
-      {/* BAC Sensing Detail Section */}
-      <section id="bac-sensing" className="min-h-screen py-48 px-6 relative flex items-center">
+      {/* Adaptive Dampening Detail Section */}
+      <section id="adaptive-dampening" className="min-h-screen py-48 px-6 relative flex items-center">
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1 }}
+            >
+              <h2 className="text-4xl font-bold mb-8 bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
+                Stress-Aware Control Adjustment
+              </h2>
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <div className="text-2xl">📊</div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white mb-2">Real-Time Fatigue Detection</h3>
+                    <p className="text-gray-400">The band continuously monitors muscle fatigue and stress biomarkers through EMG and heart rate variability, detecting when your performance may be compromised.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="text-2xl">🎯</div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white mb-2">Adaptive Control Dampening</h3>
+                    <p className="text-gray-400">When stress or nervousness is detected, the band automatically adjusts control sensitivity—dampening inputs to prevent overcorrection and costly mistakes.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="text-2xl">🛡️</div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white mb-2">Safety Envelope</h3>
+                    <p className="text-gray-400">Configurable safety boundaries prevent extreme actions when the system detects you&apos;re operating outside your normal physiological range.</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1 }}
+              className="relative"
+            >
+              <div className="w-full h-96 rounded-3xl border border-green-500/20 overflow-hidden bg-gradient-to-br from-green-900/20 to-green-800/10">
+                <NeuralBandViewer
+                  cameraPosition={[100, 60, 100]}
+                  cameraTarget={[0, 0, 0]}
+                  modelRotation={[0.3, 0.5, 0]}
+                  autoRotate={true}
+                  rotateSpeed={0.15}
+                  accentColor="#22c55e"
+                />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Back to Features Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="text-center mt-16"
+          >
+            <button
+              onClick={() => scrollToSection('features')}
+              className="px-8 py-4 border border-green-500/30 hover:border-green-400/60 text-green-400 font-semibold rounded-full transition-all duration-300 backdrop-blur-sm hover:bg-green-400/10"
+            >
+              ← Back to Features
+            </button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Spacer */}
+      <div className="h-16 bg-black"></div>
+
+      {/* AI Pattern Learning Detail Section */}
+      <section id="ai-pattern-learning" className="min-h-screen py-48 px-6 relative bg-gradient-to-b from-black to-gray-900 flex items-center">
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1 }}
+            >
+              <h2 className="text-4xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
+                AI That Learns You
+              </h2>
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <div className="text-2xl">🧠</div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white mb-2">Personal Pattern Recognition</h3>
+                    <p className="text-gray-400">ML models train on your unique EMG signatures, heart rate patterns, and muscle responses—building a profile that gets more accurate over time.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="text-2xl">📱</div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white mb-2">On-Device Processing Option</h3>
+                    <p className="text-gray-400">Choose to run AI inference on your phone or computer&apos;s hardware instead of cloud APIs. Your data stays local, and your costs stay low.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="text-2xl">🔄</div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white mb-2">Continuous Adaptation</h3>
+                    <p className="text-gray-400">The AI continuously refines its model as your patterns evolve—whether you&apos;re recovering from injury, building strength, or adapting to new equipment.</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1 }}
+              className="relative"
+            >
+              <div className="w-full h-96 rounded-3xl border border-purple-500/20 overflow-hidden bg-gradient-to-br from-purple-900/20 to-purple-800/10">
+                <NeuralBandViewer
+                  cameraPosition={[0, 120, 80]}
+                  cameraTarget={[0, 0, 0]}
+                  modelRotation={[0, 0, 0]}
+                  autoRotate={true}
+                  rotateSpeed={0.2}
+                  accentColor="#a855f7"
+                />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Back to Features Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="text-center mt-16"
+          >
+            <button
+              onClick={() => scrollToSection('features')}
+              className="px-8 py-4 border border-purple-500/30 hover:border-purple-400/60 text-purple-400 font-semibold rounded-full transition-all duration-300 backdrop-blur-sm hover:bg-purple-400/10"
+            >
+              ← Back to Features
+            </button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Habit Breaking Detail Section */}
+      <section id="habit-breaking" className="min-h-screen py-48 px-6 relative flex items-center">
         <div className="max-w-6xl mx-auto w-full">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
@@ -717,30 +678,30 @@ export default function Home() {
               transition={{ duration: 1 }}
             >
               <h2 className="text-4xl font-bold mb-8 bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
-                Smart Alcohol Monitoring
+                Break the Pattern
               </h2>
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="text-2xl">🔬</div>
+                  <div className="text-2xl">📳</div>
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Transdermal Detection</h3>
-                    <p className="text-gray-400">Advanced sensors detect alcohol through your skin, providing continuous monitoring without invasive methods.</p>
+                    <h3 className="text-xl font-semibold text-white mb-2">Habit Detection</h3>
+                    <p className="text-gray-400">The same EMG and muscle tracking sensors that enable device control can identify repetitive unwanted movements and behavioral patterns.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-4">
-                  <div className="text-2xl">📱</div>
+                  <div className="text-2xl">⚡</div>
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Real-Time Alerts</h3>
-                    <p className="text-gray-400">Get instant notifications when your BAC reaches concerning levels, helping you make informed decisions.</p>
+                    <h3 className="text-xl font-semibold text-white mb-2">Real-Time Intervention</h3>
+                    <p className="text-gray-400">Gentle haptic feedback alerts you the moment a habit pattern is detected, creating awareness before the action completes.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-4">
-                  <div className="text-2xl">👥</div>
+                  <div className="text-2xl">📊</div>
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Friend Notifications</h3>
-                    <p className="text-gray-400">Automatically alert trusted friends when it&apos;s time to pause, ensuring your safety in social situations.</p>
+                    <h3 className="text-xl font-semibold text-white mb-2">Progress Tracking</h3>
+                    <p className="text-gray-400">Track your habit frequency over time. The AI learns which interventions work best for you and adapts its approach accordingly.</p>
                   </div>
                 </div>
               </div>
@@ -754,17 +715,17 @@ export default function Home() {
               className="relative"
             >
               <div className="w-full h-96 rounded-3xl border border-amber-500/20 overflow-hidden bg-gradient-to-br from-amber-900/20 to-amber-800/10">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-8xl mb-4">🍷</div>
-                    <div className="text-2xl font-bold text-amber-400">BAC Monitor</div>
-                    <div className="text-gray-400 mt-2">Transdermal alcohol detection</div>
-                  </div>
-                </div>
+                <NeuralBandViewer
+                  cameraPosition={[-30, 20, 90]}
+                  cameraTarget={[0, 0, 0]}
+                  modelRotation={[Math.PI / 3, 0, 0.5]}
+                  autoRotate={false}
+                  accentColor="#f59e0b"
+                />
               </div>
             </motion.div>
           </div>
-          
+
           {/* Back to Features Button */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -786,163 +747,6 @@ export default function Home() {
       {/* Spacer */}
       <div className="h-16 bg-black"></div>
 
-      {/* AI Features Detail Section */}
-      <section id="ai-features" className="min-h-screen py-48 px-6 relative bg-gradient-to-b from-black to-gray-900 flex items-center">
-        <div className="max-w-6xl mx-auto w-full">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-            >
-              <h2 className="text-4xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
-                Your Personal AI Guardian
-              </h2>
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="text-2xl">🧠</div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Pattern Learning</h3>
-                    <p className="text-gray-400">AI analyzes your ECG, BAC, and motion data to understand your unique physiological patterns and habits.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-4">
-                  <div className="text-2xl">⚡</div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Predictive Alerts</h3>
-                    <p className="text-gray-400">Detect potential problems before they occur and receive subtle, context-aware feedback to break harmful habits.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-4">
-                  <div className="text-2xl">📳</div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Haptic Feedback</h3>
-                    <p className="text-gray-400">Gentle vibrations provide discreet cues during social situations, enhancing awareness without demanding attention.</p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-              className="relative"
-            >
-              <div className="w-full h-96 rounded-3xl border border-purple-500/20 overflow-hidden bg-gradient-to-br from-purple-900/20 to-purple-800/10">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-8xl mb-4">🤖</div>
-                    <div className="text-2xl font-bold text-purple-400">AI Features</div>
-                    <div className="text-gray-400 mt-2">Intelligent safety companion</div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-          
-          {/* Back to Features Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-center mt-16"
-          >
-            <button
-              onClick={() => scrollToSection('features')}
-              className="px-8 py-4 border border-purple-500/30 hover:border-purple-400/60 text-purple-400 font-semibold rounded-full transition-all duration-300 backdrop-blur-sm hover:bg-purple-400/10"
-            >
-              ← Back to Features
-            </button>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Accountability Mode Detail Section */}
-      <section id="accountability-mode" className="min-h-screen py-48 px-6 relative flex items-center">
-        <div className="max-w-6xl mx-auto w-full">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-            >
-              <h2 className="text-4xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
-                Controlled Sharing
-              </h2>
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="text-2xl">🔒</div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Privacy First</h3>
-                    <p className="text-gray-400">You control exactly what information is shared and with whom. No data is transmitted without your explicit consent.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-4">
-                  <div className="text-2xl">👥</div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Trusted Circle</h3>
-                    <p className="text-gray-400">Build your network of trusted friends and family who can receive your status updates and location when needed.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-4">
-                  <div className="text-2xl">⚙️</div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Customizable Settings</h3>
-                    <p className="text-gray-400">Set different sharing levels for different situations - from full transparency to minimal updates.</p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-              className="relative"
-            >
-              <div className="w-full h-96 rounded-3xl border border-purple-500/20 overflow-hidden bg-gradient-to-br from-purple-900/20 to-purple-800/10">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-8xl mb-4">👥</div>
-                    <div className="text-2xl font-bold text-purple-400">Accountability Mode</div>
-                    <div className="text-gray-400 mt-2">Share what you want</div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-          
-          {/* Back to Features Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-center mt-16"
-          >
-            <button
-              onClick={() => scrollToSection('features')}
-              className="px-8 py-4 border border-purple-500/30 hover:border-purple-400/60 text-purple-400 font-semibold rounded-full transition-all duration-300 backdrop-blur-sm hover:bg-purple-400/10"
-            >
-              ← Back to Features
-            </button>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Spacer */}
-      <div className="h-16 bg-black"></div>
-
       {/* History Section */}
       <section id="history" className="py-32 px-6 relative bg-gradient-to-b from-black to-gray-900">
         <div className="max-w-6xl mx-auto">
@@ -953,7 +757,7 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="text-center mb-20"
           >
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -962,7 +766,7 @@ export default function Home() {
             >
               The Journey
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -985,9 +789,9 @@ export default function Home() {
                 16 Iterations to Perfection
               </h3>
               <p className="text-gray-400 mb-8 leading-relaxed">
-                The path to the perfect prototype wasn&apos;t straightforward. It took 16 different iterations, 
-                each one teaching us something new about form, function, and user experience. 
-                Every prototype brought us closer to the ideal balance of comfort, style, and technology.
+                The path to the perfect prototype wasn&apos;t straightforward. It took 16 different iterations,
+                each one teaching us something new about form, function, and sensor placement.
+                Every prototype brought us closer to the ideal balance of comfort, wearability, and signal fidelity.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
@@ -1004,7 +808,7 @@ export default function Home() {
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="text-gray-300">Minimal Size optimization</span>
+                  <span className="text-gray-300">Minimal size optimization</span>
                 </div>
               </div>
             </motion.div>
@@ -1049,8 +853,8 @@ export default function Home() {
                 The First Working Prototype
               </h3>
               <p className="text-gray-400 mb-8 leading-relaxed">
-                This was the moment everything came together. The first working bracelet that proved our concept was possible. 
-                It wasn&apos;t perfect, but it was real—a tangible proof that the vision of a social safety bracelet could become reality.
+                This was the moment everything came together. The first working band that proved our concept was possible.
+                It wasn&apos;t perfect, but it was real—a tangible proof that a neural control band could become reality.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
@@ -1059,11 +863,11 @@ export default function Home() {
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-gray-300">MQ303B Gas Sensor (Not Transdermal)</span>
+                  <span className="text-gray-300">EMG signal capture validated</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-gray-300">Data Optimization using AI</span>
+                  <span className="text-gray-300">Data optimization using AI</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
@@ -1083,7 +887,7 @@ export default function Home() {
                 <div className="relative inline-block border border-green-500/20 rounded-3xl bg-gradient-to-br from-green-900/20 to-green-800/10 p-4">
                   <Image
                     src="/images/IMG_3182.png"
-                    alt="First Working Bracelet"
+                    alt="First Working Prototype"
                     width={400}
                     height={300}
                     className="object-contain"
@@ -1098,7 +902,7 @@ export default function Home() {
             </motion.div>
           </div>
 
-          {/* MQ303B Sensor Testing Section */}
+          {/* Sensor Testing Section */}
           <div className="grid lg:grid-cols-2 gap-16 items-center mt-32">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -1107,15 +911,15 @@ export default function Home() {
               transition={{ duration: 1 }}
             >
               <h3 className="text-3xl font-bold mb-6 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-                MQ303B Gas Sensor Testing
+                Sensor Calibration & Testing
               </h3>
               <p className="text-gray-400 mb-8 leading-relaxed">
-                Before developing the transdermal sensor, we extensively tested the MQ303B gas sensor to understand alcohol detection capabilities. This phase was crucial for validating our approach and gathering data to train our AI models for accurate readings.
+                Extensive testing of various sensor configurations to understand signal quality, noise isolation, and optimal electrode placement. This phase was crucial for validating our approach and gathering training data for the AI models.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                  <span className="text-gray-300">Gas-phase alcohol detection testing</span>
+                  <span className="text-gray-300">EMG signal quality benchmarking</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
@@ -1127,7 +931,7 @@ export default function Home() {
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                  <span className="text-gray-300">Proof of concept for alcohol sensing</span>
+                  <span className="text-gray-300">Noise isolation and filtering</span>
                 </div>
               </div>
             </motion.div>
@@ -1143,7 +947,7 @@ export default function Home() {
                 <div className="relative inline-block border border-orange-500/20 rounded-3xl bg-gradient-to-br from-orange-900/20 to-orange-800/10 p-4">
                   <Image
                     src="/images/IMG_3184.png"
-                    alt="MQ303B Gas Sensor Testing"
+                    alt="Sensor Testing"
                     width={400}
                     height={300}
                     className="object-contain"
@@ -1165,7 +969,7 @@ export default function Home() {
       {/* Spacer */}
       <div className="h-16 bg-black"></div>
 
-      {/* First Transdermal Ethanol Sensor Prototype */}
+      {/* Transdermal Sensor Section - kept as it shows technical depth */}
       <section className="py-32 px-6 relative">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -1176,37 +980,37 @@ export default function Home() {
               transition={{ duration: 1 }}
             >
               <h3 className="text-3xl font-bold mb-6 bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
-                The First Transdermal Ethanol Sensor Prototype
+                Dry Electrode EMG Sensing
               </h3>
               <p className="text-gray-400 mb-8 leading-relaxed">
-                This was the step that moved our bracelet from detecting alcohol in the air to sensing it directly through the skin. By integrating a MicruX ceramic screen-printed electrode (Carbon WE / Ag/AgCl RE) coated with Alcohol Oxidase (AOx) and adding stabilizers, we created a sensor that measures ethanol molecules diffusing through sweat vapor in real time.
+                Each link in the band contains a solid dry electrode that conforms to your wrist shape—no gels, no prep, no consumables. The chain-link design ensures consistent skin contact as you move, adapting to your unique anatomy for reliable signal capture.
               </p>
               <p className="text-gray-400 mb-8 leading-relaxed">
-                A gas-permeable ePTFE membrane shields the chemistry from sweat and oils while allowing ethanol to pass. The signal is amplified by an LMP91000 potentiostat and processed on the Seeed XIAO nRF52840 for Bluetooth streaming.
+                These electrodes measure electrical signals from hand gestures, wrist movements, and muscle contractions. The array captures both surface EMG for gesture recognition and deeper muscle tension for fatigue monitoring, amplified by an LMP91000 analog front-end and streamed via the Seeed XIAO nRF52840 over Bluetooth.
               </p>
-              
+
               <div className="space-y-4">
-                <h4 className="text-xl font-semibold text-white mb-4">Reading Cycle</h4>
+                <h4 className="text-xl font-semibold text-white mb-4">What the Electrodes Measure</h4>
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                    <span className="text-gray-300">Shutter opens to expose a SPE with a thin coat of enzyme: AOx, for the working electrode</span>
+                    <span className="text-gray-300">Surface EMG from forearm muscles—detecting finger and hand gestures</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                    <span className="text-gray-300">When ethanol vapors hit the AOx and mixes with oxygen, it creates hydrogen peroxide, which is electrochemically converted</span>
+                    <span className="text-gray-300">Muscle tension levels for real-time fatigue and stress detection</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                    <span className="text-gray-300">Converted into electrons, which can be measured when SPE is wetted and stabilizers are placed throughout it.</span>
+                    <span className="text-gray-300">Electrical signal patterns unique to each user for personalized AI training</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                    <span className="text-gray-300">Ionize water to increase conductivity</span>
+                    <span className="text-gray-300">Continuous muscle contraction data for adaptive control dampening</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                    <span className="text-gray-300">Dry the SPE for optimal usage by blotting a utilizing a fan</span>
+                    <span className="text-gray-300">On-device signal filtering and BLE streaming via nRF52840</span>
                   </div>
                 </div>
               </div>
@@ -1222,14 +1026,14 @@ export default function Home() {
               <div className="flex items-center justify-center">
                 <div className="relative inline-block border border-amber-500/20 rounded-3xl bg-gradient-to-br from-amber-900/20 to-amber-800/10 p-4">
                   <Image
-                    src="/images/Screenshot 2025-08-16 004649.png"
-                    alt="Transdermal Ethanol Sensor Screenshot"
+                    src="/images/dry-electrode-prototype.png"
+                    alt="Dry Electrode Chain-Link Design"
                     width={400}
                     height={300}
                     className="object-contain"
                     priority
                     onError={(e) => {
-                      console.error('Failed to load Screenshot 2025-08-16 004649.png');
+                      console.error('Failed to load dry-electrode-prototype.png');
                       e.currentTarget.style.display = 'none';
                     }}
                   />
@@ -1249,32 +1053,32 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-4xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent"
             >
-              Connect With Us
+              Join the Build
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xl text-gray-400 mb-12 leading-relaxed"
             >
-              Ready to embark on your next adventure? Let&apos;s create something extraordinary together.
+              Roam is open source. Whether you&apos;re a hardware hacker, ML engineer, or someone who needs better device control—there&apos;s a place for you.
             </motion.p>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.5 }}
               className="text-lg text-amber-400 mb-12 leading-relaxed"
             >
-              Currently in prototype development - Join us on this journey!
+              Currently in prototype development - Contribute or follow our progress!
             </motion.p>
 
             <motion.div
@@ -1289,7 +1093,7 @@ export default function Home() {
                 whileTap={{ scale: 0.95 }}
                 className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-full transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
               >
-                Get In Touch
+                Get Involved
               </motion.button>
             </motion.div>
 
@@ -1301,7 +1105,7 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 0.8 }}
               className="flex justify-center space-x-8"
             >
-              {['Twitter', 'LinkedIn', 'Instagram'].map((social, index) => (
+              {['Twitter', 'LinkedIn', 'GitHub'].map((social, index) => (
                 <motion.button
                   key={social}
                   whileHover={{ y: -5, scale: 1.1 }}
@@ -1323,13 +1127,13 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-white/10">
         <div className="max-w-6xl mx-auto text-center">
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             className="text-gray-500"
           >
-            © 2025 roamthewrld. Crafted for the extraordinary.
+            © 2025 roamthewrld. Open source neural interface.
           </motion.p>
         </div>
       </footer>
