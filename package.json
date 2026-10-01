@@ -2,19 +2,20 @@
   "name": "roamthewrld",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://knishiy.github.io/roamthewrld",
+  "homepage": "https://roamthewrld.com",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "npm run export && touch out/.nojekyll"
+    "deploy": "npm run build && touch out/.nojekyll",
+    "preview": "npm run build && npx --yes serve@14 out -l 3000"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "framer-motion": "^12.19.1",
-    "next": "15.3.4",
+    "next": "15.5.27",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "three": "^0.183.2"
@@ -27,8 +28,11 @@
     "@types/react-dom": "^19",
     "@types/three": "^0.183.1",
     "eslint": "^9",
-    "eslint-config-next": "15.3.4",
+    "eslint-config-next": "15.5.27",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   }
 }

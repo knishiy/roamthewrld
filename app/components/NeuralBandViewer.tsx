@@ -1,121 +1,143 @@
 'use client'
 
-import { Canvas, useLoader, useFrame, useThree } from '@react-three/fiber'
-import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
+// The actual three.js scene. Only ever loaded through <ModelStage>, which code-splits it,
+// gates it on WebGL support and wraps it in an error boundary.
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
+import { ContactShadows, Environment, Lightformer, OrbitControls } from '@react-three/drei'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
-import { useRef, Suspense, useEffect } from 'react'
+import { useEffect, useMemo, useRef, Suspense } from 'react'
 import * as THREE from 'three'
 
-interface BandModelProps {
-  rotation?: [number, number, number]
-  autoRotate?: boolean
-  rotateSpeed?: number
+export const MODEL_URL = '/models/Neural_band_mockup.stl'
+
+export type CameraPreset = [number, number, number]
+
+/**
+ * Normalise the raw SolidWorks STL (millimetres, origin at a corner) once:
+ * centre it and scale it to a unit bounding sphere so camera presets are size-independent.
+ * useLoader caches the geometry by URL and shares it between canvases, so this must be idempotent.
+ */
+const prepared = new WeakSet<THREE.BufferGeometry>()
+function prepare(geometry: THREE.BufferGeometry) {
+  if (prepared.has(geometry)) return geometry
+  geometry.center()
+  geometry.computeBoundingSphere()
+  const r = geometry.boundingSphere?.radius || 1
+  geometry.scale(1 / r, 1 / r, 1 / r)
+  geometry.computeVertexNormals()
+  geometry.computeBoundingSphere()
+  prepared.add(geometry)
+  return geometry
 }
 
-function BandModel({ rotation, autoRotate = true, rotateSpeed = 0.3 }: BandModelProps) {
-  const geometry = useLoader(STLLoader, '/models/Neural_band_mockup.stl')
-  const meshRef = useRef<THREE.Mesh>(null)
+function BandModel({ autoRotate, onReady }: { autoRotate: boolean; onReady?: () => void }) {
+  const raw = useLoader(STLLoader, MODEL_URL)
+  const geometry = useMemo(() => prepare(raw), [raw])
+  const group = useRef<THREE.Group>(null)
 
-  // Auto-rotate slowly
+  useEffect(() => {
+    onReady?.()
+  }, [onReady])
+
   useFrame((_, delta) => {
-    if (meshRef.current && autoRotate) {
-      meshRef.current.rotation.y += delta * rotateSpeed
-    }
+    if (autoRotate && group.current) group.current.rotation.y += delta * 0.25
   })
 
-  // Center the geometry
-  geometry.center()
-  geometry.computeVertexNormals()
-
-  // Apply initial rotation
-  useEffect(() => {
-    if (meshRef.current && rotation) {
-      meshRef.current.rotation.set(rotation[0], rotation[1], rotation[2])
-    }
-  }, [rotation])
-
   return (
-    <mesh ref={meshRef} geometry={geometry} castShadow receiveShadow>
-      <meshPhysicalMaterial
-        color="#1a1a2e"
-        metalness={0.8}
-        roughness={0.2}
-        clearcoat={0.4}
-        clearcoatRoughness={0.2}
-        envMapIntensity={1.2}
-      />
-    </mesh>
+    // The ring's axis is the STL's Z axis; tilt it so the band reads as a 3/4 view.
+    <group ref={group} rotation={[0, 0.9, 0]}>
+      <mesh geometry={geometry} rotation={[-0.35, 0, 0]}>
+        <meshPhysicalMaterial
+          color="#2a3142"
+          metalness={0.65}
+          roughness={0.32}
+          clearcoat={0.5}
+          clearcoatRoughness={0.25}
+          envMapIntensity={1.1}
+        />
+      </mesh>
+    </group>
   )
 }
 
-function SmoothCamera({ position, target }: { position: [number, number, number]; target?: [number, number, number] }) {
+/**
+ * Eases the camera to a new preset whenever the preset changes, then lets go so it never
+ * fights the user's own orbiting.
+ */
+function CameraRig({ position }: { position: CameraPreset }) {
   const { camera } = useThree()
-  const targetVec = useRef(new THREE.Vector3(...(target || [0, 0, 0])))
-
-  useFrame(() => {
-    camera.position.lerp(new THREE.Vector3(...position), 0.02)
-    camera.lookAt(targetVec.current)
+  const target = useMemo(() => new THREE.Vector3(...position), [position])
+  const animating = useRef(true)
+  useEffect(() => {
+    animating.current = true
+  }, [target])
+  useFrame((_, delta) => {
+    if (!animating.current) return
+    camera.position.lerp(target, 1 - Math.exp(-delta * 3))
+    camera.lookAt(0, 0, 0)
+    if (camera.position.distanceToSquared(target) < 1e-4) animating.current = false
   })
-
   return null
 }
 
-function LoadingSpinner() {
-  return (
-    <mesh>
-      <ringGeometry args={[0.8, 1, 32]} />
-      <meshBasicMaterial color="#3b82f6" wireframe />
-    </mesh>
-  )
-}
-
-interface NeuralBandViewerProps {
-  cameraPosition?: [number, number, number]
-  cameraTarget?: [number, number, number]
-  modelRotation?: [number, number, number]
+export interface NeuralBandViewerProps {
+  camera?: CameraPreset
+  accent?: string
   autoRotate?: boolean
-  rotateSpeed?: number
-  className?: string
-  accentColor?: string
+  /** When false the render loop is paused (e.g. the canvas is scrolled off-screen). */
+  active?: boolean
+  interactive?: boolean
+  onReady?: () => void
 }
 
 export default function NeuralBandViewer({
-  cameraPosition = [0, 0, 250],
-  cameraTarget = [0, 0, 0],
-  modelRotation,
+  camera = [0, 0.35, 3.3],
+  accent = '#4d8dff',
   autoRotate = true,
-  rotateSpeed = 0.3,
-  className = '',
-  accentColor = '#3b82f6',
+  active = true,
+  interactive = true,
+  onReady,
 }: NeuralBandViewerProps) {
   return (
-    <div className={`w-full h-full ${className}`}>
-      <Canvas
-        camera={{ position: cameraPosition, fov: 45 }}
-        shadows
-        gl={{ antialias: true, alpha: true }}
-        style={{ background: 'transparent' }}
-      >
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[10, 10, 5]} intensity={1.2} castShadow />
-        <directionalLight position={[-10, -5, -5]} intensity={0.4} color={accentColor} />
-        <spotLight position={[0, 10, 10]} intensity={0.6} angle={0.3} penumbra={1} color={accentColor} />
+    <Canvas
+      // No shadow maps: ContactShadows below gives the grounding without the extra passes
+      // (and avoids three r183's PCFSoftShadowMap deprecation warning on every frame).
+      dpr={[1, 1.75]}
+      frameloop={active ? 'always' : 'never'}
+      camera={{ position: camera, fov: 40, near: 0.1, far: 50 }}
+      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+      style={{ background: 'transparent', touchAction: 'pan-y' }}
+      aria-hidden="true"
+    >
+      <ambientLight intensity={0.35} />
+      <directionalLight position={[4, 5, 3]} intensity={1.4} />
+      <directionalLight position={[-4, -2, -3]} intensity={0.6} color={accent} />
 
-        <Suspense fallback={<LoadingSpinner />}>
-          <BandModel rotation={modelRotation} autoRotate={autoRotate} rotateSpeed={rotateSpeed} />
-          <Environment preset="city" />
-          <ContactShadows position={[0, -50, 0]} opacity={0.3} scale={200} blur={2} />
-          <SmoothCamera position={cameraPosition} target={cameraTarget} />
-        </Suspense>
+      <Suspense fallback={null}>
+        <BandModel autoRotate={autoRotate} onReady={onReady} />
+        <ContactShadows position={[0, -1.05, 0]} opacity={0.45} scale={4} blur={2.6} far={2} />
+      </Suspense>
 
+      {/* Environment built from local light panels: no network fetch. The previous
+          preset="city" pulled an HDR from raw.githack.com, which now returns 403, so the
+          model's Suspense boundary never resolved and only the loading spinner showed. */}
+      <Environment resolution={128} frames={1}>
+        <Lightformer intensity={2} position={[0, 3, 2]} scale={[6, 1.5, 1]} />
+        <Lightformer intensity={1.2} position={[-4, 0, 1]} rotation-y={Math.PI / 2} scale={[4, 2, 1]} />
+        <Lightformer intensity={1.5} color={accent} position={[4, -1, -1]} rotation-y={-Math.PI / 2} scale={[4, 2, 1]} />
+      </Environment>
+
+      <CameraRig position={camera} />
+
+      {interactive && (
         <OrbitControls
           enableZoom={false}
           enablePan={false}
-          autoRotate={false}
-          minPolarAngle={Math.PI / 4}
-          maxPolarAngle={Math.PI / 1.5}
+          rotateSpeed={0.6}
+          minPolarAngle={Math.PI / 5}
+          maxPolarAngle={Math.PI / 1.6}
         />
-      </Canvas>
-    </div>
+      )}
+    </Canvas>
   )
 }

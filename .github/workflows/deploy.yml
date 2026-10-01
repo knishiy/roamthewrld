@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'   # Node 18 is end-of-life; matches local dev (v22) and engines >=20.9
           cache: 'npm'
           
       - name: Install dependencies
@@ -33,8 +33,11 @@ jobs:
       - name: Build and Export with Next.js
         run: |
           npm run build
-          cp out/index.html out/404.html   # fix for client-side routes
-          echo "www.roamthewrld.com" > out/CNAME
+          touch out/.nojekyll
+          # Next's static export already writes a real out/404.html (app/not-found.tsx);
+          # copying index.html over it made every bad URL serve the home page (soft 404).
+          # Apex is the canonical domain (www 301-redirects to it).
+          echo "roamthewrld.com" > out/CNAME
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
